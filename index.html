@@ -13,6 +13,9 @@
       padding: 20px;
       min-height: 100vh;
       overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     header {
       text-align: center;
@@ -22,6 +25,7 @@
       color: #00ffff;
       font-size: 2.5em;
       text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+      animation: hop 25s infinite ease-in-out;
     }
     input {
       padding: 12px;
@@ -34,14 +38,17 @@
       background-color: #1c1c2c;
       color: #ffffff;
       text-align: center;
+      margin-top: 20px;
     }
     table {
       width: 100%;
+      max-width: 1000px;
       border-collapse: collapse;
       background-color: rgba(255, 255, 255, 0.05);
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+      margin-top: 30px;
     }
     th, td {
       padding: 14px;
@@ -62,11 +69,15 @@
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes hop {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1> Crypto Portfolio Tracker</h1>
+    <h1>💸 Crypto Portfolio Tracker</h1>
     <input type="text" id="search" placeholder="Search coins by name or symbol..." />
   </header>
   <table id="cryptoTable">
@@ -75,7 +86,10 @@
         <th>Symbol</th>
         <th>Name</th>
         <th>Price (USD)</th>
-        <th>24h Change</th>
+        <th>10s %</th>
+        <th>1min %</th>
+        <th>30min %</th>
+        <th>24h %</th>
         <th>Market Cap</th>
       </tr>
     </thead>
@@ -95,12 +109,24 @@
     });
 
     async function fetchTopCoins() {
-      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`;
+      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=1h,24h`;
       try {
         const res = await fetch(url);
         const data = await res.json();
-        allCoins = data;
-        renderCoins(data);
+        allCoins = data.map(coin => {
+          const sparkline = coin.sparkline_in_7d?.price || [];
+          const last = sparkline.length;
+          const change10s = ((sparkline[last - 1] - sparkline[last - 2]) / sparkline[last - 2]) * 100;
+          const change1m = ((sparkline[last - 1] - sparkline[last - 7]) / sparkline[last - 7]) * 100;
+          const change30m = ((sparkline[last - 1] - sparkline[last - 20]) / sparkline[last - 20]) * 100;
+          return {
+            ...coin,
+            change10s,
+            change1m,
+            change30m,
+          };
+        });
+        renderCoins(allCoins);
       } catch (err) {
         alert("Error fetching top coins");
       }
@@ -114,6 +140,15 @@
             <td>${coin.symbol.toUpperCase()}</td>
             <td>${coin.name}</td>
             <td>$${coin.current_price.toLocaleString()}</td>
+            <td style="color: ${coin.change10s >= 0 ? 'lime' : 'red'}">
+              ${coin.change10s.toFixed(2)}%
+            </td>
+            <td style="color: ${coin.change1m >= 0 ? 'lime' : 'red'}">
+              ${coin.change1m.toFixed(2)}%
+            </td>
+            <td style="color: ${coin.change30m >= 0 ? 'lime' : 'red'}">
+              ${coin.change30m.toFixed(2)}%
+            </td>
             <td style="color: ${coin.price_change_percentage_24h >= 0 ? 'lime' : 'red'}">
               ${coin.price_change_percentage_24h.toFixed(2)}%
             </td>
