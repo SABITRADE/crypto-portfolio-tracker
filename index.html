@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      background: linear-gradient(135deg, #031d44, #1e3c72, #2a5298);
       color: #ffffff;
       padding: 20px;
       min-height: 100vh;
@@ -44,10 +44,10 @@
       width: 100%;
       max-width: 1000px;
       border-collapse: collapse;
-      background-color: rgba(255, 255, 255, 0.05);
+      background-color: rgba(0, 255, 255, 0.05);
       border-radius: 10px;
       overflow: hidden;
-      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
       margin-top: 30px;
     }
     th, td {
@@ -77,7 +77,7 @@
 </head>
 <body>
   <header>
-    <h1>💸 Crypto Portfolio Tracker</h1>
+    <h1>Crypto Portfolio Tracker</h1>
     <input type="text" id="search" placeholder="Search coins by name or symbol..." />
   </header>
   <table id="cryptoTable">
@@ -86,9 +86,7 @@
         <th>Symbol</th>
         <th>Name</th>
         <th>Price (USD)</th>
-        <th>10s %</th>
         <th>1min %</th>
-        <th>30min %</th>
         <th>24h %</th>
         <th>Market Cap</th>
       </tr>
@@ -116,14 +114,10 @@
         allCoins = data.map(coin => {
           const sparkline = coin.sparkline_in_7d?.price || [];
           const last = sparkline.length;
-          const change10s = ((sparkline[last - 1] - sparkline[last - 2]) / sparkline[last - 2]) * 100;
           const change1m = ((sparkline[last - 1] - sparkline[last - 7]) / sparkline[last - 7]) * 100;
-          const change30m = ((sparkline[last - 1] - sparkline[last - 20]) / sparkline[last - 20]) * 100;
           return {
             ...coin,
-            change10s,
-            change1m,
-            change30m,
+            change1m
           };
         });
         renderCoins(allCoins);
@@ -140,14 +134,8 @@
             <td>${coin.symbol.toUpperCase()}</td>
             <td>${coin.name}</td>
             <td>$${coin.current_price.toLocaleString()}</td>
-            <td style="color: ${coin.change10s >= 0 ? 'lime' : 'red'}">
-              ${coin.change10s.toFixed(2)}%
-            </td>
             <td style="color: ${coin.change1m >= 0 ? 'lime' : 'red'}">
               ${coin.change1m.toFixed(2)}%
-            </td>
-            <td style="color: ${coin.change30m >= 0 ? 'lime' : 'red'}">
-              ${coin.change30m.toFixed(2)}%
             </td>
             <td style="color: ${coin.price_change_percentage_24h >= 0 ? 'lime' : 'red'}">
               ${coin.price_change_percentage_24h.toFixed(2)}%
