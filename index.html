@@ -3,50 +3,71 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crypto Portfolio Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #0d1117;
-      color: #c9d1d9;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      color: #ffffff;
       padding: 20px;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
     header {
       text-align: center;
-      margin-bottom: 30px;
+      margin-bottom: 40px;
     }
     h1 {
-      color: #58a6ff;
+      color: #00ffff;
+      font-size: 2.5em;
+      text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
     }
     input {
-      padding: 10px;
-      width: 300px;
+      padding: 12px;
+      width: 320px;
       font-size: 16px;
-      border-radius: 5px;
+      border-radius: 8px;
       border: none;
-      margin-bottom: 20px;
+      outline: none;
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      background-color: #1c1c2c;
+      color: #ffffff;
+      text-align: center;
     }
     table {
       width: 100%;
       border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
     }
     th, td {
-      padding: 10px;
-      border-bottom: 1px solid #30363d;
+      padding: 14px;
       text-align: left;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     th {
-      background-color: #161b22;
+      background-color: rgba(0, 255, 255, 0.1);
+      color: #00ffff;
     }
     tr:hover {
-      background-color: #21262d;
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    .fade-in {
+      animation: fadeIn 0.6s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>💸 Crypto Portfolio Tracker</h1>
-    <input type="text" id="search" placeholder="Enter a crypto symbol (e.g. BTC)" />
+    <h1> Crypto Portfolio Tracker</h1>
+    <input type="text" id="search" placeholder="Search coins by name or symbol..." />
   </header>
   <table id="cryptoTable">
     <thead>
@@ -55,46 +76,53 @@
         <th>Name</th>
         <th>Price (USD)</th>
         <th>24h Change</th>
+        <th>Market Cap</th>
       </tr>
     </thead>
     <tbody></tbody>
   </table>  <script>
     const input = document.getElementById("search");
     const tableBody = document.querySelector("#cryptoTable tbody");
+    let allCoins = [];
 
-    input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") {
-        fetchCrypto(input.value.toLowerCase());
-      }
+    input.addEventListener("input", function () {
+      const query = input.value.toLowerCase();
+      const filtered = allCoins.filter(coin =>
+        coin.name.toLowerCase().includes(query) ||
+        coin.symbol.toLowerCase().includes(query)
+      );
+      renderCoins(filtered);
     });
 
-    async function fetchCrypto(symbol) {
-      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${symbol}`;
-
+    async function fetchTopCoins() {
+      const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1`;
       try {
         const res = await fetch(url);
         const data = await res.json();
+        allCoins = data;
+        renderCoins(data);
+      } catch (err) {
+        alert("Error fetching top coins");
+      }
+    }
 
-        if (data.length === 0) {
-          alert("Cryptocurrency not found!");
-          return;
-        }
-
-        const coin = data[0];
+    function renderCoins(coins) {
+      tableBody.innerHTML = "";
+      coins.forEach(coin => {
         const row = `
-          <tr>
+          <tr class="fade-in">
             <td>${coin.symbol.toUpperCase()}</td>
             <td>${coin.name}</td>
             <td>$${coin.current_price.toLocaleString()}</td>
             <td style="color: ${coin.price_change_percentage_24h >= 0 ? 'lime' : 'red'}">
               ${coin.price_change_percentage_24h.toFixed(2)}%
             </td>
+            <td>$${coin.market_cap.toLocaleString()}</td>
           </tr>`;
-
         tableBody.insertAdjacentHTML("beforeend", row);
-      } catch (err) {
-        alert("Error fetching data");
-      }
+      });
     }
+
+    fetchTopCoins();
   </script></body>
 </html>
