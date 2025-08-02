@@ -1,127 +1,127 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Crypto Portfolio Tracker</title>
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background-color: #010d1a;
-      color: white;
-    }
-    header {
-      text-align: center;
-      padding: 40px 0 20px 0;
-      font-size: 2.5em;
-      font-weight: bold;
-      color: #00f7ff;
-      text-shadow: 0 0 15px #00f7ff;
-      animation: bounce 25s infinite;
-    }
-    @keyframes bounce {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-5px);
-      }
-    }
-    .search-bar {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #0b0f1a;
+      color: #fff;
       display: flex;
-      justify-content: center;
-      margin: 20px;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
     }
-    input[type="text"] {
-      padding: 10px;
-      width: 300px;
-      border-radius: 10px;
+
+    h1 {
+      font-size: 2.5rem;
+      color: #00f0ff;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      animation: float 25s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    input {
+      padding: 0.7rem 1rem;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      border-radius: 8px;
       border: none;
-      outline: none;
+      width: 300px;
+      max-width: 90%;
     }
+
     table {
-      width: 90%;
-      margin: auto;
+      width: 100%;
+      max-width: 900px;
       border-collapse: collapse;
+      background-color: #10172a;
+      border-radius: 10px;
+      overflow: hidden;
     }
+
     th, td {
-      padding: 12px;
-      text-align: left;
-      border-bottom: 1px solid #1a1a1a;
+      padding: 1rem;
+      text-align: center;
+      border-bottom: 1px solid #222;
     }
+
     th {
-      color: #00f7ff;
+      background-color: #132345;
+      color: #00f0ff;
     }
+
+    tr:hover {
+      background-color: #1d2b4d;
+    }
+
     .positive {
       color: #00ff00;
     }
+
     .negative {
-      color: #ff3333;
+      color: #ff5555;
     }
   </style>
 </head>
 <body>
-  <header>Crypto Portfolio Tracker</header>
-  <div class="search-bar">
-    <input type="text" id="searchInput" placeholder="Search coins by name or symbol...">
-  </div>
-  <table id="cryptoTable">
+  <h1>Crypto Portfolio Tracker</h1>
+  <input type="text" id="search" placeholder="Search coins by name or symbol..." />
+
+  <table>
     <thead>
       <tr>
+        <th>Coin</th>
         <th>Price (USD)</th>
         <th>24h %</th>
         <th>Market Cap</th>
       </tr>
     </thead>
-    <tbody>
-      <!-- Coin data will be inserted here by JavaScript -->
-    </tbody>
+    <tbody id="crypto-data"></tbody>
   </table>
+
   <script>
-    const coins = [
-      { price: "$112,296", change24h: -0.33, marketCap: "$2,235,325,617,300" },
-      { price: "$3,378.63", change24h: -0.58, marketCap: "$408,184,533,093" },
-      { price: "$1", change24h: 0.00, marketCap: "$163,865,365,080" },
-      { price: "$2.75", change24h: -4.17, marketCap: "$163,438,170,631" },
-      { price: "$733.32", change24h: -0.96, marketCap: "$102,150,281,269" },
-      { price: "$157.38", change24h: -0.80, marketCap: "$84,812,131,426" },
-      { price: "$1", change24h: 0.00, marketCap: "$64,189,983,402" },
-      { price: "$0.321", change24h: -1.50, marketCap: "$30,434,712,928" },
-      { price: "$3,372.65", change24h: -2.36, marketCap: "$30,251,105,298" },
-      { price: "$0.19", change24h: -1.23, marketCap: "$28,562,458,612" },
-      { price: "$0.693", change24h: -1.26, marketCap: "$25,133,983,196" },
-    ];function loadCoins() {
-  const tbody = document.querySelector("#cryptoTable tbody");
-  tbody.innerHTML = "";
-  coins.forEach(coin => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${coin.price}</td>
-      <td class="${coin.change24h < 0 ? 'negative' : 'positive'}">${coin.change24h.toFixed(2)}%</td>
-      <td>${coin.marketCap}</td>
-    `;
-    tbody.appendChild(row);
-  });
-}
+    const API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100";
 
-document.getElementById("searchInput").addEventListener("input", function () {
-  const query = this.value.toLowerCase();
-  const filteredCoins = coins.filter(coin => coin.price.includes(query));
-  const tbody = document.querySelector("#cryptoTable tbody");
-  tbody.innerHTML = "";
-  filteredCoins.forEach(coin => {
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${coin.price}</td>
-      <td class="${coin.change24h < 0 ? 'negative' : 'positive'}">${coin.change24h.toFixed(2)}%</td>
-      <td>${coin.marketCap}</td>
-    `;
-    tbody.appendChild(row);
-  });
-});
+    const tbody = document.getElementById('crypto-data');
+    const searchInput = document.getElementById('search');
 
-loadCoins();
+    async function fetchCrypto() {
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      displayData(data);
 
+      searchInput.addEventListener('input', () => {
+        const filtered = data.filter(coin =>
+          coin.name.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+          coin.symbol.toLowerCase().includes(searchInput.value.toLowerCase())
+        );
+        displayData(filtered);
+      });
+    }
+
+    function displayData(coins) {
+      tbody.innerHTML = coins.map(coin => `
+        <tr>
+          <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
+          <td>$${coin.current_price.toLocaleString()}</td>
+          <td class="${coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative'}">
+            ${coin.price_change_percentage_24h?.toFixed(2)}%
+          </td>
+          <td>$${coin.market_cap.toLocaleString()}</td>
+        </tr>
+      `).join('');
+    }
+
+    fetchCrypto();
   </script>
 </body>
 </html>
