@@ -96,6 +96,7 @@
   </style>
 </head>
 <body>
+  <div class="container">
   <h1>Crypto Portfolio Tracker</h1>
   <input type="text" id="search" placeholder="Search coins by name or symbol..." />
 
@@ -110,6 +111,7 @@
     </thead>
     <tbody id="crypto-data"></tbody>
   </table>
+  </div>
 
   <script>
     const API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100";
