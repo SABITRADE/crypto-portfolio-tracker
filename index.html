@@ -25,9 +25,13 @@ color: #000; /* to make text readable on light blue */
       max-width: 850px;
     }
 h1 {
-  color: #001f33; /* dark navy blue for good contrast */
-  ...
-    }
+  text-align: center;
+  color: #001f33;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.4);
+  margin-bottom: 1.5rem;
+  font-size: 2rem;
+  animation: bounce 5s ease-in-out infinite;
+}
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-8px); }
