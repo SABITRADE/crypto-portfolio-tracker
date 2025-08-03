@@ -126,8 +126,10 @@
 
       searchInput.addEventListener('input', () => {
         const filtered = data.filter(coin =>
-          coin.name.toLowerCase().includes(searchInput.value.toLowerCase()) ||
-          coin.symbol.toLowerCase().includes(searchInput.value.toLowerCase())
+          const filtered = data.filter(coin =>
+  coin.name.toLowerCase().includes(searchInput.value.toLowerCase()) ||
+  coin.symbol.toLowerCase().includes(searchInput.value.toLowerCase())
+);
         );
         displayData(filtered);
       });
