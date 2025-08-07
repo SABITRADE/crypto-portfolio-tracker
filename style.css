@@ -1,1 +1,84 @@
+/* Reset and base styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0d1117;
+  color: #ffffff;
+  line-height: 1.6;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1 {
+  font-size: 2.5rem;
+  color: #00b4d8;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+}
+
+input[type="text"] {
+  padding: 0.8rem 1rem;
+  width: 100%;
+  max-width: 400px;
+  border: 1px solid #00b4d8;
+  border-radius: 8px;
+  background-color: #161b22;
+  color: #ffffff;
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+/* Table Styling */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #161b22;
+  box-shadow: 0 0 10px rgba(0, 180, 216, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+thead {
+  background-color: #00b4d8;
+}
+
+thead th {
+  color: #ffffff;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+tbody td {
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #2e3c4f;
+}
+
+tbody tr:hover {
+  background-color: #1d2631;
+}
+
+.positive {
+  color: #00ff88;
+}
+
+.negative {
+  color: #ff4d4d;
+}
+
+footer {
+  margin-top: 3rem;
+  text-align: center;
+  color: #888;
+  font-size: 0.9rem;
+  }
