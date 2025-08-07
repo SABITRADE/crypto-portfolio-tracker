@@ -1,27 +1,76 @@
-// script.js
+<script>
+  let allCoins = []; // store all fetched coins
+  const searchInput = document.getElementById("search");
+  const tableBody = document.getElementById("crypto-table");
+  const notFoundText = document.getElementById("not-found");
 
-const API_URL = 'https://api.coingecko.com/api/v3'; const cryptoData = document.getElementById('crypto-data'); const searchInput = document.getElementById('search');
+  // Load top 100 on dashboard
+  async function loadTopCoins() {
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100&page=1`);
+    const data = await res.json();
+    allCoins = data; // store top 100 for display
+    displayCoins(data);
+  }
 
-let allCoins = []; let displayedCoins = [];
+  // Fetch up to 5000 coins for search only (background)
+  async function preloadAllCoins() {
+    let fullList = [];
+    for (let page = 1; page <= 20; page++) {
+      const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&page=${page}`);
+      const data = await res.json();
+      fullList = fullList.concat(data);
+    }
+    allCoins = fullList;
+  }
 
-// Fetch top 100 coins initially async function fetchTopCoins() { try { const res = await fetch(${API_URL}/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false); const data = await res.json(); displayedCoins = data; renderTable(data); } catch (error) { console.error('Error fetching top coins:', error); } }
+  // Show coins in the table
+  function displayCoins(coins) {
+    tableBody.innerHTML = "";
+    notFoundText.style.display = "none";
 
-// Fetch all coins list for search reference async function fetchAllCoins() { try { const res = await fetch(${API_URL}/coins/list); const data = await res.json(); allCoins = data; } catch (error) { console.error('Error fetching coin list:', error); } }
+    if (!coins.length) {
+      notFoundText.style.display = "block";
+      return;
+    }
 
-// Search functionality searchInput.addEventListener('input', async (e) => { const query = e.target.value.toLowerCase(); if (!query) { renderTable(displayedCoins); return; }
+    coins.forEach(coin => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
+        <td>$${coin.current_price.toLocaleString()}</td>
+        <td style="color: ${coin.price_change_percentage_24h >= 0 ? 'lightgreen' : 'salmon'};">
+          ${coin.price_change_percentage_24h?.toFixed(2) ?? "0.00"}%
+        </td>
+        <td>$${coin.market_cap.toLocaleString()}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
 
-const matchedCoin = allCoins.find( coin => coin.name.toLowerCase() === query || coin.symbol.toLowerCase() === query || coin.id.toLowerCase() === query );
+  // Handle search input
+  searchInput.addEventListener("input", () => {
+    const term = searchInput.value.toLowerCase().trim();
 
-if (matchedCoin) { try { const res = await fetch(${API_URL}/coins/markets?vs_currency=usd&ids=${matchedCoin.id}); const data = await res.json(); renderTable(data); } catch (error) { console.error('Error fetching coin details:', error); } } else { renderTable([]); } });
+    if (!term) {
+      loadTopCoins(); // show top 100 again
+      return;
+    }
 
-// Render table rows function renderTable(coins) { cryptoData.innerHTML = '';
+    const results = allCoins.filter(coin =>
+      coin.name.toLowerCase().includes(term) || coin.symbol.toLowerCase().includes(term)
+    );
 
-if (coins.length === 0) { cryptoData.innerHTML = '<tr><td colspan="4">No coins found</td></tr>'; return; }
+    displayCoins(results);
+  });
 
-coins.forEach(coin => { const changeClass = coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative'; const row = <tr> <td>${coin.name}</td> <td>$${coin.current_price.toLocaleString()}</td> <td class="${changeClass}">${coin.price_change_percentage_24h.toFixed(2)}%</td> <td>$${coin.market_cap.toLocaleString()}</td> </tr>; cryptoData.innerHTML += row; }); }
+  // Refresh top 100 coins every 60 seconds if not searching
+  setInterval(() => {
+    if (!searchInput.value.trim()) {
+      loadTopCoins();
+    }
+  }, 60000); // 60,000 ms = 60 seconds
 
-// Refresh prices periodically setInterval(fetchTopCoins, 15000);
-
-// Initialize fetchTopCoins(); fetchAllCoins();
-
-
+  // Init
+  loadTopCoins();
+  preloadAllCoins(); // preload in background for search
+</script>
