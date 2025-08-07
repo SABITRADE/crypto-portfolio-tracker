@@ -1,167 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Crypto Portfolio Tracker</title>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-  background-color: #0a0f2c; /* deep navy blue */
-  color: #ffffff;
-      padding: 2rem 1rem;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 850px;
-    }
-h1 {
-  text-align: center;
-  color: #00f0ff; /* Neon blue */
-  text-shadow: 0 0 8px #00f0ff; /* Optional glow */
-  margin-bottom: 1.5rem;
-  font-size: 2rem;
-  animation: bounce 5s ease-in-out infinite; /* optional if still enabled */
-}
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    input {
-      display: block;
-      margin: 0 auto 2rem;
-      padding: 0.7rem 1rem;
-      width: 100%;
-      max-width: 400px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 8px;
-      background-color: #1a1f30;
-      color: #fff;
-    }
-
-    .table-wrapper {
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: #10172a;
-      border-radius: 10px;
-      overflow: hidden;
-      font-size: 0.95rem;
-    }
-
-    th, td {
-      padding: 0.8rem;
-      text-align: center;
-      border-bottom: 1px solid #1e2b44;
-    }
-
-    th {
-      background-color: #132345;
-      color: #00f0ff;
-    }
-
-    tr:hover {
-      background-color: #1c2d4f;
-    }
-
-    .positive {
-      color: #00ff88;
-    }
-
-    .negative {
-      color: #ff5555;
-    }
-
-    @media screen and (max-width: 600px) {
-      th, td {
-        padding: 0.5rem;
-        font-size: 0.85rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Price Tracker</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>Crypto Portfolio Tracker</h1>
-    <input type="text" id="search" placeholder="Search by name or symbol..." />
-    <div class="table-wrapper">
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Price (USD)</th>
-            <th>24h %</th>
-            <th>Market Cap</th>
-          </tr>
-        </thead>
-        <tbody id="crypto-data"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <script>
-    const API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100";
-    const tbody = document.getElementById("crypto-data");
-    const searchInput = document.getElementById("search");
-    let allCoins = [];
-
-    async function fetchCrypto() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        allCoins = data;
-        renderTable(allCoins);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    }
-
-    function renderTable(data) {
-      const html = data.map(coin => `
+  <header class="header">
+    <h1 class="title">Crypto Price Tracker</h1>
+    <input
+      type="text"
+      id="search"
+      placeholder="Search for any coin (e.g. BTC, ETH, USDT...)"
+    />
+  </header>  <main>
+    <table>
+      <thead>
         <tr>
-          <td>${coin.name}</td>
-          <td>$${coin.current_price.toLocaleString()}</td>
-          <td class="${coin.price_change_percentage_24h >= 0 ? 'positive' : 'negative'}">
-            ${coin.price_change_percentage_24h?.toFixed(2)}%
-          </td>
-          <td>$${coin.market_cap.toLocaleString()}</td>
+          <th>Coin</th>
+          <th>Price (USD)</th>
+          <th>24h %</th>
+          <th>Market Cap</th>
         </tr>
-      `).join("");
-      tbody.innerHTML = html;
-    }
-
-    // Initial fetch
-    fetchCrypto();
-
-    // Refresh every 30 seconds
-    setInterval(fetchCrypto, 30000);
-
-    // Search functionality
-    searchInput.addEventListener("input", () => {
-      const query = searchInput.value.toLowerCase();
-      const filtered = allCoins.filter(coin =>
-        coin.name.toLowerCase().includes(query) ||
-        coin.symbol.toLowerCase().includes(query)
-      );
-      renderTable(filtered);
-    });
-  </script>
-</body>
+      </thead>
+      <tbody id="crypto-table"></tbody>
+    </table>
+  </main>  <footer>
+    <p>&copy; 2025 Crypto Tracker. Built by MINISTER DBO.</p>
+  </footer>  <script src="script.js"></script></body>
 </html>
