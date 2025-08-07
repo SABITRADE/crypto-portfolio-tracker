@@ -1,1 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Crypto Price Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: #ffffff;
+      padding: 20px;
+      margin: 0;
+    }
 
+    h1 {
+      text-align: center;
+      color: #38bdf8;
+      margin-bottom: 1rem;
+    }
+
+    input[type="text"] {
+      display: block;
+      margin: 0 auto 20px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      border: 1px solid #38bdf8;
+      border-radius: 5px;
+      background-color: #0f172a;
+      color: #ffffff;
+    }
+
+    table {
+      width: 95%;
+      margin: auto;
+      border-collapse: collapse;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    th {
+      background-color: #1e3a8a;
+      color: #ffffff;
+    }
+
+    .not-found {
+      text-align: center;
+      margin-top: 2rem;
+      color: #ff6b6b;
+    }
+
+    tr:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Crypto Price Tracker</h1>
+  <input type="text" id="search" placeholder="Search any coin by name or symbol (e.g. SHIBA, UNI, TON)..." />
+
+  <table>
+    <thead>
+      <tr>
+        <th>Coin</th>
+        <th>Price (USD)</th>
+        <th>24h %</th>
+        <th>Market Cap</th>
+      </tr>
+    </thead>
+    <tbody id="crypto-table">
+      <!-- Coins will load here -->
+    </tbody>
+  </table>
+
+  <p id="not-found" class="not-found" style="display: none;">Coin not found</p>
+
+  <script>
+    let allCoins = []; // store all fetched coins
+    const searchInput = document.getElementById("search");
+    const tableBody = document.getElementById("crypto-table");
+    const notFoundText = document.getElementById("not-found");
+
+    // Load top 100 on dashboard
+    async function loadTopCoins() {
+      const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=100&page=1`);
+      const data = await res.json();
+      allCoins = data; // initial 100
+      displayCoins(data);
+    }
+
+    // Fetch up to 5000 coins for search only (background)
+    async function preloadAllCoins() {
+      let fullList = [];
+      for (let page = 1; page <= 20; page++) {
+        const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&per_page=250&page=${page}`);
+        const data = await res.json();
+        fullList = fullList.concat(data);
+      }
+      allCoins = fullList;
+    }
+
+    // Show coins in the table
+    function displayCoins(coins) {
+      tableBody.innerHTML = "";
+      notFoundText.style.display = "none";
+
+      if (!coins.length) {
+        notFoundText.style.display = "block";
+        return;
+      }
+
+      coins.forEach(coin => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${coin.name} (${coin.symbol.toUpperCase()})</td>
+          <td>$${coin.current_price.toLocaleString()}</td>
+          <td style="color: ${coin.price_change_percentage_24h >= 0 ? 'lightgreen' : 'salmon'};">
+            ${coin.price_change_percentage_24h?.toFixed(2) ?? "0.00"}%
+          </td>
+          <td>$${coin.market_cap.toLocaleString()}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    }
+
+    // Handle search input
+    searchInput.addEventListener("input", () => {
+      const term = searchInput.value.toLowerCase().trim();
+
+      if (!term) {
+        // show top 100 again
+        loadTopCoins();
+        return;
+      }
+
+      const results = allCoins.filter(coin =>
+        coin.name.toLowerCase().includes(term) || coin.symbol.toLowerCase().includes(term)
+      );
+
+      displayCoins(results);
+    });
+
+    // Init
+    loadTopCoins();
+    preloadAllCoins(); // preload in background for search
+  </script>
+</body>
+  </html>
